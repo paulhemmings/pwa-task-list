@@ -1,0 +1,45 @@
+syntax = "proto3";
+package tasks;
+
+import "google/protobuf/timestamp.proto";
+
+message User {
+  string name = 1;
+  repeated string devices = 2;
+  string email = 3;
+}
+
+message Task {
+  string name = 1;
+  string description = 2;
+  int32 size = 3;
+
+  string creator = 4;
+  string assigned = 5;
+  string confirmer = 6;
+
+  TaskState taskState = 7;
+  string expectedCompletion = 8;
+
+  enum TaskState {
+    NEW = 0;
+    IN_PROGRESS = 1;
+    COMPLETE = 2;
+    BLOCKED = 3;
+  }
+
+  google.protobuf.Timestamp last_updated = 9;
+}
+
+// Our application
+
+message TaskApp {
+  repeated Task tasks = 1;
+  repeated User users = 2;
+}
+
+// search response messages
+
+message TaskSearchResult {
+  repeated Task tasks = 1;
+}

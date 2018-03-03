@@ -1,3 +1,7 @@
+# app specific
+taskapp_pb2.py
+my-task-list-store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
