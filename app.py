@@ -21,48 +21,43 @@ def tasks():
 
     # GET
     if request.method == 'GET':
-        print "value is =>",taskApp.tasks
-        assigned = request.args.get('assigned')
-        result = taskapp_pb2.TaskSearchResult(
-            tasks = [x for x in taskApp.tasks if x.assigned == assigned]
-        )
-
-        if wantsJson(request):
-            return MessageToJson(result)
-
-        return result.SerializeToString()
-        # json.dumps(taskApp.tasks)
-        # return taskApp.tasks[0].SerializeToString();
+        result = filterTasks(taskApp.tasks, request)
+        return fromBuffer(result, wantsJson(request))
 
     # POST branch
     task = taskapp_pb2.Task()
-
-    if gettingJson(request):
-        newTask = json_format.Parse(request.data, task, ignore_unknown_fields=False)
-        taskApp.tasks.extend([newTask])
-        data.write(taskApp)
-        return MessageToJson(newTask)
-
-    task.ParseFromString(request.data)
-    taskApp.tasks.extend([task])
+    newTask = toBuffer(request.data, task, gettingJson(request))
+    taskApp.tasks.extend([newTask])
     data.write(taskApp)
-    return task.SerializeToString()
+    return fromBuffer(newTask, gettingJson(request))
 
-@app.route('/api/users', methods=['GET', 'POST'])
+@app.route('/api/users', methods=['POST'])
 def users():
 
     taskApp = data.read()
 
-    # GET
-    if request.method == 'GET':
-        return taskApp.users
-
     # POST branch
     user = taskapp_pb2.User()
-    user.ParseFromString(request.data)
-    taskApp.users.extend([user])
+    newUser = toBuffer(request.data, user, gettingJson(request))
+    taskApp.users.extend([newUser])
     data.write(taskApp)
-    return taskApp
+    return fromBuffer(newUser, gettingJson(request))
+
+def filterTasks(list, request):
+    assigned = request.args.get('assigned')
+    return taskapp_pb2.TaskSearchResult(
+        tasks = [x for x in list if x.assigned == assigned]
+    )
+
+def fromBuffer(data, toJson):
+    if toJson:
+        return MessageToJson(data)
+    return data.SerializeToString()
+
+def toBuffer(data, instance, fromJson):
+    if fromJson:
+        return json_format.Parse(data, instance, ignore_unknown_fields=False)
+    return instance.ParseFromString(data)
 
 def wantsJson(request):
     return request.headers['Accept'] == "application/json"
