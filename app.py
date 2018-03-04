@@ -7,6 +7,7 @@ from google.protobuf import json_format
 import json
 import taskapp_pb2
 import data
+import uuid
 
 app = Flask(__name__)
 
@@ -27,21 +28,13 @@ def tasks():
     # POST branch
     task = taskapp_pb2.Task()
     newTask = toBuffer(request.data, task, gettingJson(request))
+    newTask.time_created.GetCurrentTime()
+    newTask.last_updated.GetCurrentTime()
+    newTask.id = str(uuid.uuid4())
     taskApp.tasks.extend([newTask])
     data.write(taskApp)
     return fromBuffer(newTask, gettingJson(request))
 
-@app.route('/api/users', methods=['POST'])
-def users():
-
-    taskApp = data.read()
-
-    # POST branch
-    user = taskapp_pb2.User()
-    newUser = toBuffer(request.data, user, gettingJson(request))
-    taskApp.users.extend([newUser])
-    data.write(taskApp)
-    return fromBuffer(newUser, gettingJson(request))
 
 def filterTasks(list, request):
     assigned = request.args.get('assigned')

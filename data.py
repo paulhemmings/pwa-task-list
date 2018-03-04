@@ -1,6 +1,7 @@
 
 import taskapp_pb2
 import sys
+import uuid
 
 def create():
     write(taskapp_pb2.TaskApp(
@@ -20,7 +21,8 @@ def create():
             taskState = 0,
             creator = 'paul',
             assigned = 'aiden',
-            confirmer = ''
+            confirmer = '',
+            id = str(uuid.uuid4())
         ),taskapp_pb2.Task(
             name = 'clean car',
             description = '',
@@ -28,7 +30,8 @@ def create():
             taskState = 0,
             creator = 'ali',
             assigned = 'paul',
-            confirmer = ''
+            confirmer = '',
+            id = str(uuid.uuid4())
         )]
     ));
 

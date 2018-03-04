@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task List</title>
+  <link rel="stylesheet" type="text/css" href="static/styles/inline.css">
+
+  <link rel="manifest" href="static/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Tasks">
+  <link rel="apple-touch-icon" href="static/images/icons/icon-152x152.png">
+  <meta name="msapplication-TileImage" content="static/images/icons/icon-144x144.png">
+  <meta name="msapplication-TileColor" content="#2F3BA2">
+</head>
+<body>
+
+  <header class="header">
+    <h1 class="header__title">Tasks</h1>
+    <button id="butRefresh" class="headerButton" aria-label="Refresh"></button>
+    <button id="butAdd" class="headerButton" aria-label="Add"></button>
+  </header>
+
+  <main class="main">
+    <div class="task taskTemplate task-list" hidden>
+      <div class="task-key" hidden></div>
+      <div class="task-name"></div>
+      <div class="task-last-updated" hidden></div>
+      <div class="task-description"></div>
+      <div class="task-assigner"></div>
+      <div class="task-assigned"></div>
+      <div class="task-confirmer"></div>
+      <div class="task-state"></div>
+      <div class="task-completed"></div>
+    </div>
+  </main>
+
+  <div class="dialog-container">
+    <div class="dialog">
+      <div class="dialog-title">Add new task</div>
+      <div class="dialog-body">
+        <div class="new-task-key" hidden></div>
+        <div class="new-task-last-updated" hidden></div>
+        <span>Name:</span><input type='text' class="new-task-name"/><br/>
+        <span>Desc:</span><input type='text' class="new-task-description"/><br/>
+        <span>Assigner:</span><input type='text' class="new-task-assigner"/><br/>
+        <span>Assigned:</span><input type='text' class="new-task-assigned"/><br/>
+        <span>Size:</span><input type='text' class="new-task-size"/><br/>
+      </div>
+      <div class="dialog-buttons">
+        <button id="butAddTask" class="button">Add</button>
+        <button id="butAddCancel" class="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="loader">
+    <svg viewBox="0 0 32 32" width="32" height="32">
+      <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
+    </svg>
+  </div>
+
+  <!-- Uncomment the line below when ready to test with fake data -->
+  <script src="static/scripts/app.js" async></script>
+
+</body>
+</html>

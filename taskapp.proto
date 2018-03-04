@@ -10,6 +10,7 @@ message User {
 }
 
 message Task {
+
   string name = 1;
   string description = 2;
   int32 size = 3;
@@ -29,6 +30,9 @@ message Task {
   }
 
   google.protobuf.Timestamp last_updated = 9;
+  google.protobuf.Timestamp time_created = 10;
+  string id = 11;
+
 }
 
 // Our application
