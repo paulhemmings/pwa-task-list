@@ -257,45 +257,51 @@ body {
 .task-list .date, .task-list .description {
   font-size: 1.25em; }
 
-.task-list .current {
+.new-task-entry {
+  width: 100%;
+  margin-bottom: 1em;
+  margin-top: 0.5em;
+}
+
+.task-list {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex; }
-  .task-list .current .icon {
+  .task-list .icon {
     width: 128px;
     height: 128px; }
-  .task-list .current .visual {
+  .task-list .visual {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
     font-size: 4em; }
-    .task-list .current .visual .scale {
+    .task-list .visual .scale {
       font-size: 0.5em;
       vertical-align: super; }
-  .task-list .current .visual, .task-list .current .description {
+  .task-list .visual, .task-list .description {
     -webkit-box-flex: 1;
     -webkit-flex-grow: 1;
         -ms-flex-positive: 1;
             flex-grow: 1; }
-  .task-list .current .sunset:before {
-    content: "Sunset: ";
+  .task-list .task-name:before, .new-task-name:before {
+    content: "Name: ";
     color: #888; }
-  .task-list .current .wind:before {
-    content: "Wind: ";
+  .task-list .task-description:before {
+    content: "Description: ";
     color: #888; }
-  .task-list .current .sunrise:before {
-    content: "Sunrise: ";
+  .task-list .task-assigner:before {
+    content: "Assigner: ";
     color: #888; }
-  .task-list .current .humidity:before {
-    content: "Humidity: ";
+  .task-list .task-assigned:before {
+    content: "Assigned: ";
     color: #888; }
-  .task-list .current .pollen:before {
-    content: "Pollen Count: ";
+  .task-list .task-confirmer:before {
+    content: "Confirmed By: ";
     color: #888; }
-  .task-list .current .pcount:before {
-    content: "Pollen ";
+  .task-list .task-state:before {
+    content: "State ";
     color: #888; }
 
 .task-list .future {
@@ -348,10 +354,10 @@ body {
 @media (max-width: 450px) {
   .task-list .date, .task-list .description {
     font-size: 0.9em; }
-  .task-list .current .icon {
+  .task-list .icon {
     width: 96px;
     height: 96px; }
-  .task-list .current .visual {
+  .task-list .visual {
     font-size: 3em; }
   .task-list .future .oneday .icon {
     width: 32px;

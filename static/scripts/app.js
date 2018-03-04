@@ -97,10 +97,6 @@
       app.container.removeAttribute('hidden');
       app.isLoading = false;
     }
-
-    app.selectedTasks.push(task);
-    localStorage.selectedTasks = JSON.stringify(app.selectedTasks);
-
   };
 
 
@@ -122,7 +118,6 @@
 
     var client = 'aiden'; // for now
     var url = 'http://127.0.0.1:5000/api/tasks?assigned=' + client
-    // TODO add cache logic here
 
     if ('caches' in window) {
 
@@ -153,6 +148,10 @@
           response.tasks.forEach(function(task) {
             app.updateTaskCard(task);
           });
+          app.selectedTasks = JSON.parse(request.response).tasks;
+          localStorage.selectedTasks = JSON.stringify(app.selectedTasks);
+
+          // app.removeOldCards(response.tasks);
         }
       }
 
@@ -161,6 +160,20 @@
     request.setRequestHeader("Accept", "application/json");
     request.send();
   };
+
+  // remove old card
+
+  app.removeOldCards = function(tasks) {
+    var keys = Object.keys(app.visibleCards);
+    var ids = tasks.map(function(task) {
+      return task.id;
+    });
+    keys.forEach(function(key) {
+      if(ids.filter(id => id == key).length <1) {
+        app.visibleCards[key].remove();
+      }
+    });
+  }
 
   // save the new card
 
@@ -189,7 +202,6 @@
    *   SimpleDB (https://gist.github.com/inexorabletash/c8069c042b734519680c)
    ************************************************************************/
 
-  // TODO add startup code here
   app.selectedTasks = localStorage.selectedTasks;
   if (app.selectedTasks) {
     app.selectedTasks = JSON.parse(app.selectedTasks);
@@ -198,13 +210,15 @@
     });
   } else {
     app.visibleCards = {};
-    app.selectedTasks = [];
+    localStorage.selectedTasks = app.selectedTasks = [];
   }
 
-  // TODO add service worker code here
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker
              .register('./static/service-worker.js')
              .then(function() { console.log('Service Worker Registered'); });
   }
+
+
+
 })();

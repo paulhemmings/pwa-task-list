@@ -25,15 +25,17 @@
 
   <main class="main">
     <div class="task taskTemplate task-list" hidden>
-      <div class="task-key" hidden></div>
-      <div class="task-name"></div>
-      <div class="task-last-updated" hidden></div>
-      <div class="task-description"></div>
-      <div class="task-assigner"></div>
-      <div class="task-assigned"></div>
-      <div class="task-confirmer"></div>
-      <div class="task-state"></div>
-      <div class="task-completed"></div>
+      <div class="description">
+        <div class="task-key" hidden></div>
+        <div class="task-name"></div>
+        <div class="task-last-updated" hidden></div>
+        <div class="task-description"></div>
+        <div class="task-assigner"></div>
+        <div class="task-assigned"></div>
+        <div class="task-confirmer"></div>
+        <div class="task-state"></div>
+        <div class="task-completed"></div>
+      </div>
     </div>
   </main>
 
@@ -43,11 +45,11 @@
       <div class="dialog-body">
         <div class="new-task-key" hidden></div>
         <div class="new-task-last-updated" hidden></div>
-        <span>Name:</span><input type='text' class="new-task-name"/><br/>
-        <span>Desc:</span><input type='text' class="new-task-description"/><br/>
-        <span>Assigner:</span><input type='text' class="new-task-assigner"/><br/>
-        <span>Assigned:</span><input type='text' class="new-task-assigned"/><br/>
-        <span>Size:</span><input type='text' class="new-task-size"/><br/>
+        <div>Name:</div><input type='text' class="new-task-entry new-task-name"/><br/>
+        <div>Desc:</div><input type='text' class="new-task-entry new-task-description"/><br/>
+        <div>Assigner:</div><input type='text' class="new-task-entry new-task-assigner"/><br/>
+        <div>Assigned:</div><input type='text' class="new-task-entry new-task-assigned"/><br/>
+        <div>Size:</div><input type='text' class="new-task-entry new-task-size"/><br/>
       </div>
       <div class="dialog-buttons">
         <button id="butAddTask" class="button">Add</button>
