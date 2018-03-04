@@ -35,6 +35,13 @@ def create():
         )]
     ));
 
+def update(existing, new):
+    existing.size = new.size
+    existing.taskState = new.taskState
+    existing.confirmer = new.confirmer
+    existing.last_updated.GetCurrentTime()
+    return existing
+
 def read():
     try:
       with open('my-task-list-store', "rb") as f:

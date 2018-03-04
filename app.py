@@ -28,19 +28,28 @@ def tasks():
     # POST branch
     task = taskapp_pb2.Task()
     newTask = toBuffer(request.data, task, gettingJson(request))
-    newTask.time_created.GetCurrentTime()
-    newTask.last_updated.GetCurrentTime()
-    newTask.id = str(uuid.uuid4())
-    taskApp.tasks.extend([newTask])
-    data.write(taskApp)
+
+    matchingTasks = findMatch(taskApp.tasks, newTask)
+    if len(matchingTasks) > 0:
+        data.update(matchingTasks[0], newTask)
+        data.write(taskApp)
+    else:
+        newTask.time_created.GetCurrentTime()
+        newTask.last_updated.GetCurrentTime()
+        newTask.id = str(uuid.uuid4())
+        taskApp.tasks.extend([newTask])
+        data.write(taskApp)
+
     return fromBuffer(newTask, gettingJson(request))
+
+def findMatch(tasks, filter):
+    return [x for x in tasks if x.id == filter.id]
 
 
 def filterTasks(list, request):
     assigned = request.args.get('assigned')
     return taskapp_pb2.TaskSearchResult(
-        tasks = [x for x in list if x.assigned == assigned]
-    )
+        tasks = [x for x in list if x.assigned == assigned])
 
 def fromBuffer(data, toJson):
     if toJson:

@@ -2,6 +2,7 @@
   'use strict';
 
   var app = {
+    person: '',
     isLoading: true,
     visibleCards: {},
     selectedTasks: [],
@@ -11,7 +12,15 @@
     addDialog: document.querySelector('.dialog-container')
   };
 
-  // events
+  /*****************************************************************************
+   *
+   * Events
+   *
+   ****************************************************************************/
+
+   document.querySelector('.main').addEventListener('click', function(e) {
+     app.updateTaskState(e);
+   });
 
   document.getElementById('butRefresh').addEventListener('click', function() {
     app.updateTasks();
@@ -32,9 +41,18 @@
     app.toggleAddDialog(false);
   });
 
-  document.getElementById('butAddCancel').addEventListener('click', function() {
-    // Close the add new city dialog
+  document.getElementById('butSetPerson').addEventListener('click', function() {
+    app.person = localStorage.selectedPerson = document.querySelector('.person-name').value;
     app.toggleAddDialog(false);
+    app.turnOffPersonDialog();
+    app.loadCards();
+  });
+
+  document.querySelectorAll('.butAddCancel').forEach(function(but) {
+    but.addEventListener('click', function() {
+        // Close the add new city dialog
+        app.toggleAddDialog(false);
+    });
   });
 
 
@@ -43,6 +61,11 @@
    * Methods to update/refresh the UI
    *
    ****************************************************************************/
+
+  app.turnOffPersonDialog = function() {
+    document.querySelector('.new-task').removeAttribute('hidden');
+    document.querySelector('.set-person').setAttribute('hidden', true);
+  }
 
   // Toggles the visibility of the add new city dialog.
   app.toggleAddDialog = function(visible) {
@@ -64,6 +87,7 @@
       card = app.taskTemplate.cloneNode(true);
       card.classList.remove('taskTemplate');
       card.querySelector('.task-name').textContent = task.name;
+      card.querySelector('.task-key').textContent = task.id;
       card.removeAttribute('hidden');
       app.container.appendChild(card);
       app.visibleCards[task.id] = card;
@@ -89,7 +113,8 @@
     card.querySelector('.task-assigner').textContent = task.creator;
     card.querySelector('.task-assigned').textContent = task.assigned;
     card.querySelector('.task-confirmer').textContent = task.confirmer;
-    card.querySelector('.task-state').textContent = task.state;
+    card.querySelector('.task-state').textContent = task.taskState;
+    card.querySelector('.task-size').textContent = task.size;
     card.querySelector('.task-completed').textContent = task.completed;
 
     if (app.isLoading) {
@@ -116,9 +141,7 @@
    */
   app.updateTasks = function() {
 
-    var client = 'aiden'; // for now
-    var url = 'http://127.0.0.1:5000/api/tasks?assigned=' + client
-
+    var url = 'http://127.0.0.1:5000/api/tasks?assigned=' + app.person
     if ('caches' in window) {
 
       /*
@@ -191,34 +214,80 @@
     request.send(JSON.stringify(task));
   }
 
+  // update the task
+
+  app.updateTaskState = function(e) {
+    var card = e.target.closest('.task-list');
+    var id = card ? card.querySelector('.task-key').textContent : '';
+    var task = app.selectedTasks.filter(function(task) {
+      return task.id == id;
+    })
+    task = task.length > 0 ? task[0] : null;
+    if (task) {
+      // NEW = 0;
+      // IN_PROGRESS = 1;
+      // COMPLETE = 2;
+      // BLOCKED = 3;
+      var nextState = 1;
+      var currentState = card.querySelector('.task-state').textContent;
+      if (currentState == 'IN_PROGRESS') {
+        nextState = 2;
+      } else if (currentState == 'COMPLETE') {
+        if (!card.querySelector('.task-confirmer').textContent) {
+          nextState = 1;
+        }
+      }
+      task.taskState = nextState;
+      app.saveNewTask(task);
+    }
+  }
+
   /************************************************************************
-   *
-   * Code required to start the app
-   *
-   * NOTE: To simplify this codelab, we've used localStorage.
-   *   localStorage is a synchronous API and has serious performance
-   *   implications. It should not be used in production applications!
-   *   Instead, check out IDB (https://www.npmjs.com/package/idb) or
+   * TODO:
+   *   IDB (https://www.npmjs.com/package/idb) or
    *   SimpleDB (https://gist.github.com/inexorabletash/c8069c042b734519680c)
    ************************************************************************/
 
-  app.selectedTasks = localStorage.selectedTasks;
-  if (app.selectedTasks) {
-    app.selectedTasks = JSON.parse(app.selectedTasks);
-    app.selectedTasks.forEach(function(task) {
-      app.updateTaskCard(task);
-    });
-  } else {
+  app.clearStorage = function() {
     app.visibleCards = {};
     localStorage.selectedTasks = app.selectedTasks = [];
   }
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker
-             .register('./static/service-worker.js')
-             .then(function() { console.log('Service Worker Registered'); });
+  app.loadCards = function() {
+    app.selectedTasks = localStorage.selectedTasks;
+    if (app.selectedTasks) {
+      app.selectedTasks = JSON.parse(app.selectedTasks);
+      app.selectedTasks.forEach(function(task) {
+        app.updateTaskCard(task);
+      });
+    } else {
+      app.clearStorage();
+      app.updateTasks();
+    }
   }
 
+  app.registerWorker = function() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+               .register('./static/service-worker.js')
+               .then(function() { console.log('Service Worker Registered'); });
+    }
+  }
+
+  app.begin = function() {
+
+    if (!localStorage.selectedPerson) {
+      app.clearStorage();
+      app.toggleAddDialog(true);
+    } else {
+      app.turnOffPersonDialog();
+      app.loadCards();
+    }
+
+    app.registerWorker();
+  }
+
+  app.begin();
 
 
 })();

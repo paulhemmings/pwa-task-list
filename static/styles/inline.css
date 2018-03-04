@@ -264,10 +264,10 @@ body {
 }
 
 .task-list {
-  display: -webkit-box;
-  display: -webkit-flex;
+  /* display: -webkit-box; */
+  /* display: -webkit-flex; */
   display: -ms-flexbox;
-  display: flex; }
+/* display: flex; */ }
   .task-list .icon {
     width: 128px;
     height: 128px; }
@@ -303,53 +303,9 @@ body {
   .task-list .task-state:before {
     content: "State ";
     color: #888; }
-
-.task-list .future {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex; }
-  .task-list .future .oneday {
-    -webkit-box-flex: 1;
-    -webkit-flex-grow: 1;
-        -ms-flex-positive: 1;
-            flex-grow: 1;
-    text-align: center; }
-    .task-list .future .oneday .icon {
-      width: 64px;
-      height: 64px;
-      margin-left: auto;
-      margin-right: auto; }
-    .task-list .future .oneday .temp-high, .task-list .future .oneday .temp-low {
-      display: inline-block; }
-    .task-list .future .oneday .temp-low {
-      color: #888; }
-
-.task-list .icon {
-  background-repeat: no-repeat;
-  background-size: contain; }
-  .task-list .icon.clear-day {
-    background-image: url("/images/clear.png"); }
-  .task-list .icon.clear-night {
-    background-image: url("/images/clear.png"); }
-  .task-list .icon.rain {
-    background-image: url("/images/rain.png"); }
-  .task-list .icon.snow {
-    background-image: url("/images/snow.png"); }
-  .task-list .icon.sleet {
-    background-image: url("/images/sleet.png"); }
-  .task-list .icon.windy {
-    background-image: url("/images/wind.png"); }
-  .task-list .icon.fog {
-    background-image: url("/images/fog.png"); }
-  .task-list .icon.cloudy {
-    background-image: url("/images/cloudy.png"); }
-  .task-list .icon.partly-cloudy-day {
-    background-image: url("/images/partly-cloudy.png"); }
-  .task-list .icon.partly-cloudy-night {
-    background-image: url("/images/partly-cloudy.png"); }
-  .task-list .icon.thunderstorms {
-    background-image: url("/images/thunderstorm.png"); }
+  .task-list .task-size:before {
+    content: "Size ";
+    color: #888; }
 
 @media (max-width: 450px) {
   .task-list .date, .task-list .description {

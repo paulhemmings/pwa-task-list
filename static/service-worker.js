@@ -2,7 +2,7 @@ var dataCacheName = 'pauls-task-list-v1';
 var cacheName = 'pauls-task-list-final-1';
 var filesToCache = [
   '/',
-  '/templates/home.html',
+//  '/templates/home.html',
   '/static/scripts/app.js',
   '/static/styles/inline.css'
 ];
