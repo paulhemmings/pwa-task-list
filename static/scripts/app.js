@@ -2,9 +2,9 @@
   'use strict';
 
   var app = {
-    person: '',
     isLoading: true,
     visibleCards: {},
+    selectedTask: null,
     selectedTasks: [],
     spinner: document.querySelector('.loader'),
     taskTemplate: document.querySelector('.taskTemplate'),
@@ -23,7 +23,7 @@
    });
 
   document.getElementById('butRefresh').addEventListener('click', function() {
-    app.updateTasks();
+    app.refreshTasks();
   });
 
   document.getElementById('butAdd').addEventListener('click', function() {
@@ -31,6 +31,7 @@
   });
 
   document.getElementById('butAddTask').addEventListener('click', function() {
+    app.toggleAddDialog(false);
     app.saveNewTask({
       "assigned": document.querySelector('.new-task-assigned').value,
       "creator": document.querySelector('.new-task-assigner').value,
@@ -38,20 +39,32 @@
       "description": "",
       "size": document.querySelector('.new-task-size').value
     });
-    app.toggleAddDialog(false);
   });
 
   document.getElementById('butSetPerson').addEventListener('click', function() {
-    app.person = localStorage.selectedPerson = document.querySelector('.person-name').value;
     app.toggleAddDialog(false);
-    app.turnOffPersonDialog();
+    app.turnOnTaskDialog();
+    localStorage.selectedPerson = document.querySelector('.person-name').value;
     app.loadCards();
   });
 
+  document.getElementById('butSetConfirmer').addEventListener('click', function() {
+    app.toggleAddDialog(false);
+    app.turnOnTaskDialog();
+    if (app.selectedTask) {
+      app.selectedTask.confirmer = document.querySelector('.confirmer-name').value;
+      if (app.selectedTask.confirmer) {
+        app.selectedTask.taskState = 2; // COMPLETE
+        app.saveNewTask(app.selectedTask);
+        app.selectedTask = null;
+      }
+    }
+  });
+
+
   document.querySelectorAll('.butAddCancel').forEach(function(but) {
     but.addEventListener('click', function() {
-        // Close the add new city dialog
-        app.toggleAddDialog(false);
+      app.toggleAddDialog(false);
     });
   });
 
@@ -62,9 +75,16 @@
    *
    ****************************************************************************/
 
-  app.turnOffPersonDialog = function() {
+  app.turnOnTaskDialog = function() {
     document.querySelector('.new-task').removeAttribute('hidden');
     document.querySelector('.set-person').setAttribute('hidden', true);
+    document.querySelector('.set-confirmer').setAttribute('hidden', true);
+  }
+
+  app.turnOnConfirmerDialog = function() {
+    document.querySelector('.set-confirmer').removeAttribute('hidden');
+    document.querySelector('.set-person').setAttribute('hidden', true);
+    document.querySelector('.new-task').setAttribute('hidden', true);
   }
 
   // Toggles the visibility of the add new city dialog.
@@ -91,6 +111,18 @@
       card.removeAttribute('hidden');
       app.container.appendChild(card);
       app.visibleCards[task.id] = card;
+
+      var association;
+      if (localStorage.selectedPerson == task.creator) {
+        association = 'assigner';
+      } else if (localStorage.selectedPerson == task.assigned) {
+        association = 'assigned';
+      } else if (localStorage.selectedPerson == task.confirmer) {
+        association = 'confirmer';
+      }
+      if (association) {
+        card.classList.add(association);
+      }
     }
 
     // Verifies the data provide is newer than what's already visible
@@ -124,6 +156,21 @@
     }
   };
 
+    // remove old card
+
+    app.removeOldCards = function(tasks) {
+      var keys = Object.keys(app.visibleCards);
+      var ids = tasks.map(function(task) {
+        return task.id;
+      });
+      keys.forEach(function(key) {
+        if(ids.filter(id => id == key).length <1) {
+          card = app.visibleCards[key]
+          card.parentNode.remove(card);
+        }
+      });
+    }
+
 
   /*****************************************************************************
    *
@@ -139,9 +186,9 @@
    * request goes through, then the card gets updated a second time with the
    * freshest data.
    */
-  app.updateTasks = function() {
+  app.refreshTasks = function() {
 
-    var url = 'http://127.0.0.1:5000/api/tasks?assigned=' + app.person
+    var url = 'http://127.0.0.1:5000/api/tasks?name=' + localStorage.selectedPerson
     if ('caches' in window) {
 
       /*
@@ -184,19 +231,6 @@
     request.send();
   };
 
-  // remove old card
-
-  app.removeOldCards = function(tasks) {
-    var keys = Object.keys(app.visibleCards);
-    var ids = tasks.map(function(task) {
-      return task.id;
-    });
-    keys.forEach(function(key) {
-      if(ids.filter(id => id == key).length <1) {
-        app.visibleCards[key].remove();
-      }
-    });
-  }
 
   // save the new card
 
@@ -209,7 +243,7 @@
         }
       }
     }
-    request.open('POST', 'http://127.0.0.1:5000/api/tasks')
+    request.open('POST', 'http://127.0.0.1:5000/api/task')
     request.setRequestHeader("Content-Type", "application/json");
     request.send(JSON.stringify(task));
   }
@@ -224,22 +258,33 @@
     })
     task = task.length > 0 ? task[0] : null;
     if (task) {
-      // NEW = 0;
-      // IN_PROGRESS = 1;
-      // COMPLETE = 2;
-      // BLOCKED = 3;
-      var nextState = 1;
-      var currentState = card.querySelector('.task-state').textContent;
-      if (currentState == 'IN_PROGRESS') {
-        nextState = 2;
-      } else if (currentState == 'COMPLETE') {
-        if (!card.querySelector('.task-confirmer').textContent) {
-          nextState = 1;
-        }
-      }
-      task.taskState = nextState;
-      app.saveNewTask(task);
+      app.progressTaskState(card, task);
     }
+  }
+
+  app.progressTaskState = function(card, task) {
+    var states = ['NEW','IN_PROGRESS','COMPLETE','BLOCKED','CLOSED']
+    var possible = [];
+    if (card.classList.contains('assigned')) {
+      possible = ['IN_PROGRESS','COMPLETE','BLOCKED'];
+    } else if (card.classList.contains('assigner')) {
+      possible = ['IN_PROGRESS','COMPLETE','BLOCKED','CLOSED'];
+    } else if (card.classList.contains('confirmer')) {
+      possible = ['IN_PROGRESS'];
+    }
+    var currentState = card.querySelector('.task-state').textContent;
+    var nextState = possible[possible.indexOf(currentState) > possible.length -2 ? 0 : possible.indexOf(currentState) +1];
+    var stateIndex = states.indexOf(nextState);
+
+    if (nextState == 'COMPLETE') {
+      app.selectedTask = task;
+      app.turnOnConfirmerDialog();
+      app.toggleAddDialog(true);
+      return;
+    }
+
+    task.taskState = stateIndex;
+    app.saveNewTask(task);
   }
 
   /************************************************************************
@@ -262,7 +307,7 @@
       });
     } else {
       app.clearStorage();
-      app.updateTasks();
+      app.refreshTasks();
     }
   }
 
@@ -280,7 +325,7 @@
       app.clearStorage();
       app.toggleAddDialog(true);
     } else {
-      app.turnOffPersonDialog();
+      app.turnOnTaskDialog();
       app.loadCards();
     }
 

@@ -27,6 +27,7 @@ message Task {
     IN_PROGRESS = 1;
     COMPLETE = 2;
     BLOCKED = 3;
+    CLOSED = 4;
   }
 
   google.protobuf.Timestamp last_updated = 9;

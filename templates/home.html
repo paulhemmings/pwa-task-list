@@ -42,13 +42,23 @@
 
   <div class="dialog-container">
     <div class="dialog">
+      <div class="set-confirmer" hidden>
+        <div class="dialog-title">Who confirms complete?</div>
+        <div class="dialog-body">
+          <div>Name:</div><input type='text' class="confirmer-name"/><br/>
+        </div>
+        <div class="dialog-buttons">
+          <button id="butSetConfirmer" class="button">Confirm</button>
+          <button class="butAddCancel" class="button">Cancel</button>
+        </div>
+      </div>
       <div class="set-person">
         <div class="dialog-title">Who am I?</div>
         <div class="dialog-body">
           <div>Name:</div><input type='text' class="person-name"/><br/>
         </div>
         <div class="dialog-buttons">
-          <button id="butSetPerson" class="button">Add</button>
+          <button id="butSetPerson" class="button">Set</button>
           <button class="butAddCancel" class="button">Cancel</button>
         </div>
       </div>

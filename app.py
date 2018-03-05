@@ -11,25 +11,24 @@ import uuid
 
 app = Flask(__name__)
 
+# Given -> root
+# Return -> home page
+
 @app.route('/', methods=['GET'])
 def home():
     return render_template('home.html')
 
-@app.route('/api/tasks', methods=['GET', 'POST'])
-def tasks():
+# Given -> a task
+# Return -> new task or existing task edited
+
+@app.route('/api/task', methods=['POST'])
+def task():
 
     taskApp = data.read()
-
-    # GET
-    if request.method == 'GET':
-        result = filterTasks(taskApp.tasks, request)
-        return fromBuffer(result, wantsJson(request))
-
-    # POST branch
     task = taskapp_pb2.Task()
     newTask = toBuffer(request.data, task, gettingJson(request))
 
-    matchingTasks = findMatch(taskApp.tasks, newTask)
+    matchingTasks = filterById(taskApp.tasks, newTask.id)
     if len(matchingTasks) > 0:
         data.update(matchingTasks[0], newTask)
         data.write(taskApp)
@@ -42,14 +41,24 @@ def tasks():
 
     return fromBuffer(newTask, gettingJson(request))
 
-def findMatch(tasks, filter):
-    return [x for x in tasks if x.id == filter.id]
+# Given -> a name
+# Return -> all associated tasks
 
+@app.route('/api/tasks', methods=['GET', 'POST'])
+def tasks():
+    taskApp = data.read()
+    if request.method == 'GET':
+        result = filterByName(taskApp.tasks, request.args.get('name'))
+        return fromBuffer(result, wantsJson(request))
 
-def filterTasks(list, request):
-    assigned = request.args.get('assigned')
+## Helper functions
+
+def filterById(tasks, id):
+    return [x for x in tasks if x.id == id]
+
+def filterByName(tasks, name):
     return taskapp_pb2.TaskSearchResult(
-        tasks = [x for x in list if x.assigned == assigned])
+        tasks = [x for x in tasks if x.assigned == name or x.creator == name or x.confirmer == name])
 
 def fromBuffer(data, toJson):
     if toJson:
@@ -66,6 +75,8 @@ def wantsJson(request):
 
 def gettingJson(request):
     return request.headers['Content-Type'] == "application/json"
+
+## start
 
 if __name__ == '__main__':
     app.run(debug=True)
