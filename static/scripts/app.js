@@ -17,9 +17,15 @@
    *
    ****************************************************************************/
 
-   document.querySelector('.main').addEventListener('click', function(e) {
-     app.updateTaskState(e);
-   });
+  document.querySelector('.main').addEventListener('click', function(e) {
+    var card = e.target.closest('.task-list');
+    var id = card ? card.querySelector('.task-key').textContent : '';
+    app.selectedTasks.filter(function(task) {
+      return task.id == id;
+    }).forEach(function (task) {
+      app.progressTaskState(card, task);
+    })
+  });
 
   document.getElementById('butRefresh').addEventListener('click', function() {
     app.refreshTasks();
@@ -79,7 +85,6 @@
 
   app.updateTaskCard = function(task) {
     var dataLastUpdated = new Date(task.lastUpdated);
-
     var card = app.visibleCards[task.id];
     if (!card) {
       card = app.taskTemplate.cloneNode(true);
@@ -168,14 +173,6 @@
    *
    ****************************************************************************/
 
-  /*
-   * Gets a forecast for a specific city and updates the card with the data.
-   * getForecast() first checks if the weather data is in the cache. If so,
-   * then it gets that data and populates the card with the cached data.
-   * Then, getForecast() goes to the network for fresh data. If the network
-   * request goes through, then the card gets updated a second time with the
-   * freshest data.
-   */
   app.refreshTasks = function() {
 
     var url = 'http://127.0.0.1:5000/api/tasks?name=' + localStorage.selectedPerson
@@ -239,18 +236,6 @@
   }
 
   // update the task
-
-  app.updateTaskState = function(e) {
-    var card = e.target.closest('.task-list');
-    var id = card ? card.querySelector('.task-key').textContent : '';
-    var task = app.selectedTasks.filter(function(task) {
-      return task.id == id;
-    })
-    task = task.length > 0 ? task[0] : null;
-    if (task) {
-      app.progressTaskState(card, task);
-    }
-  }
 
   app.progressTaskState = function(card, task) {
     var states = ['NEW','IN_PROGRESS','COMPLETE','BLOCKED','CLOSED']
