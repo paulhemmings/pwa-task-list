@@ -4,7 +4,6 @@
   var app = {
     isLoading: true,
     visibleCards: {},
-    selectedTask: null,
     selectedTasks: [],
     spinner: document.querySelector('.loader'),
     taskTemplate: document.querySelector('.taskTemplate'),
@@ -34,7 +33,7 @@
     app.toggleAddDialog(false);
     app.saveNewTask({
       "assigned": document.querySelector('.new-task-assigned').value,
-      "creator": document.querySelector('.new-task-assigner').value,
+      "creator": localStorage.selectedPerson,
       "name": document.querySelector('.new-task-name').value,
       "description": "",
       "size": document.querySelector('.new-task-size').value
@@ -47,20 +46,6 @@
     localStorage.selectedPerson = document.querySelector('.person-name').value;
     app.loadCards();
   });
-
-  document.getElementById('butSetConfirmer').addEventListener('click', function() {
-    app.toggleAddDialog(false);
-    app.turnOnTaskDialog();
-    if (app.selectedTask) {
-      app.selectedTask.confirmer = document.querySelector('.confirmer-name').value;
-      if (app.selectedTask.confirmer) {
-        app.selectedTask.taskState = 2; // COMPLETE
-        app.saveNewTask(app.selectedTask);
-        app.selectedTask = null;
-      }
-    }
-  });
-
 
   document.querySelectorAll('.butAddCancel').forEach(function(but) {
     but.addEventListener('click', function() {
@@ -78,13 +63,6 @@
   app.turnOnTaskDialog = function() {
     document.querySelector('.new-task').removeAttribute('hidden');
     document.querySelector('.set-person').setAttribute('hidden', true);
-    document.querySelector('.set-confirmer').setAttribute('hidden', true);
-  }
-
-  app.turnOnConfirmerDialog = function() {
-    document.querySelector('.set-confirmer').removeAttribute('hidden');
-    document.querySelector('.set-person').setAttribute('hidden', true);
-    document.querySelector('.new-task').setAttribute('hidden', true);
   }
 
   // Toggles the visibility of the add new city dialog.
@@ -117,8 +95,6 @@
         association = 'assigner';
       } else if (localStorage.selectedPerson == task.assigned) {
         association = 'assigned';
-      } else if (localStorage.selectedPerson == task.confirmer) {
-        association = 'confirmer';
       }
       if (association) {
         card.classList.add(association);
@@ -154,6 +130,8 @@
       app.container.removeAttribute('hidden');
       app.isLoading = false;
     }
+
+    // app.sortCards();
   };
 
     // remove old card
@@ -166,8 +144,20 @@
       keys.forEach(function(key) {
         if(ids.filter(id => id == key).length <1) {
           card = app.visibleCards[key]
-          card.parentNode.remove(card);
+          card.remove();
         }
+      });
+    }
+
+    app.sortCards = function() {
+      var list = document.querySelector('.main');
+      var orders = ['assigned', 'assigner'];
+      orders.reverse().forEach(function(order) {
+        var ids = list.querySelectorAll('.task-list.' + order);
+        ids.forEach(function(id) {
+          id.remove();
+          list.prepend(id);
+        });
       });
     }
 
@@ -266,22 +256,14 @@
     var states = ['NEW','IN_PROGRESS','COMPLETE','BLOCKED','CLOSED']
     var possible = [];
     if (card.classList.contains('assigned')) {
-      possible = ['IN_PROGRESS','COMPLETE','BLOCKED'];
+      possible = ['IN_PROGRESS', 'COMPLETE', 'BLOCKED'];
     } else if (card.classList.contains('assigner')) {
-      possible = ['IN_PROGRESS','COMPLETE','BLOCKED','CLOSED'];
-    } else if (card.classList.contains('confirmer')) {
-      possible = ['IN_PROGRESS'];
+      possible = ['IN_PROGRESS', 'CLOSED'];
     }
+
     var currentState = card.querySelector('.task-state').textContent;
     var nextState = possible[possible.indexOf(currentState) > possible.length -2 ? 0 : possible.indexOf(currentState) +1];
     var stateIndex = states.indexOf(nextState);
-
-    if (nextState == 'COMPLETE') {
-      app.selectedTask = task;
-      app.turnOnConfirmerDialog();
-      app.toggleAddDialog(true);
-      return;
-    }
 
     task.taskState = stateIndex;
     app.saveNewTask(task);

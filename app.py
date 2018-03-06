@@ -58,7 +58,7 @@ def filterById(tasks, id):
 
 def filterByName(tasks, name):
     return taskapp_pb2.TaskSearchResult(
-        tasks = [x for x in tasks if x.assigned == name or x.creator == name or x.confirmer == name])
+        tasks = [x for x in tasks if x.assigned == name or x.creator == name])
 
 def fromBuffer(data, toJson):
     if toJson:
